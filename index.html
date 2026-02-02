@@ -836,36 +836,137 @@
             try {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
+                
+                // Format optimisé pour Facebook : 1200x630 (ratio 1.91:1)
                 canvas.width = 1200;
-                canvas.height = 800;
+                canvas.height = 630;
 
-                ctx.fillStyle = '#ffffff';
+                // Fond dégradé bleu
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, '#1e3a8a');
+                gradient.addColorStop(0.5, '#3b82f6');
+                gradient.addColorStop(1, '#60a5fa');
+                ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = '#1e3a8a';
-                ctx.font = 'bold 36px Arial';
+                // Titre
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 42px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText('Météo Bretagne - ' + (currentPeriod === 'matin' ? 'Matin' : 'Après-midi'), canvas.width / 2, 50);
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.shadowBlur = 10;
+                ctx.fillText('Prévisions & Risques - Morbihan', canvas.width / 2, 50);
+                
+                // Sous-titre avec période
+                ctx.font = 'bold 28px Arial';
+                const periodLabel = currentPeriod === 'matin' ? '🌅 Matin' : '☀️ Après-midi';
+                ctx.fillText(periodLabel, canvas.width / 2, 85);
+                ctx.shadowBlur = 0;
 
-                ctx.font = '18px Arial';
-                ctx.fillStyle = '#666';
+                // Date
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#e0e7ff';
                 const date = new Date(meteoConfig.dateMiseAJour);
-                ctx.fillText('Mise à jour : ' + date.toLocaleDateString('fr-FR'), canvas.width / 2, 80);
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                ctx.fillText(date.toLocaleDateString('fr-FR', options), canvas.width / 2, 110);
 
-                const modeLabels = { temps: 'Temps', vent: 'Vent', temperature: 'Température' };
-                ctx.fillText('Affichage : ' + modeLabels[currentDisplay], canvas.width / 2, 105);
-
-                const mapStartY = 140;
-                ctx.strokeStyle = '#ccc';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(50, mapStartY, canvas.width - 100, 450);
-
+                // Charger et dessiner l'image de la carte
                 if (meteoConfig.carteImage) {
                     const img = new Image();
                     img.crossOrigin = 'anonymous';
                     await new Promise((resolve, reject) => {
                         img.onload = () => {
-                            ctx.drawImage(img, 50, mapStartY, canvas.width - 100, 450);
+                            // Zone pour la carte
+                            const mapX = 50;
+                            const mapY = 130;
+                            const mapWidth = canvas.width - 100;
+                            const mapHeight = 420;
+                            
+                            // Dessiner l'image de la carte
+                            ctx.drawImage(img, mapX, mapY, mapWidth, mapHeight);
+                            
+                            // Dessiner les icônes météo sur la carte
+                            const scaleX = mapWidth / meteoConfig.imageLargeurOriginale;
+                            const scaleY = mapHeight / meteoConfig.imageHauteurOriginale;
+                            
+                            Object.entries(meteoConfig.villes).forEach(([ville, data]) => {
+                                const periodData = data[currentPeriod];
+                                
+                                // Calculer la position de l'icône
+                                const iconX = mapX + (data.xPercent / 100) * mapWidth;
+                                const iconY = mapY + (data.yPercent / 100) * mapHeight;
+                                const iconSize = 40; // Taille fixe pour l'export
+                                
+                                if (currentDisplay === 'temps') {
+                                    // Dessiner un cercle de fond blanc pour l'icône
+                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                                    ctx.beginPath();
+                                    ctx.arc(iconX, iconY, iconSize / 2 + 2, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    
+                                    // Emoji météo simplifié
+                                    const emojiMeteo = {
+                                        'ensoleille': '☀️',
+                                        'ensoleille-nuages': '🌤️',
+                                        'partiellement-nuageux': '⛅',
+                                        'couvert': '☁️',
+                                        'brouillard': '🌫️',
+                                        'couvert-pluie': '🌧️',
+                                        'variable-averses': '🌦️',
+                                        'averses-orageuses': '⛈️',
+                                        'couvert-neige': '🌨️'
+                                    };
+                                    ctx.font = iconSize + 'px Arial';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.fillText(emojiMeteo[periodData.temps] || '☁️', iconX, iconY);
+                                    
+                                } else if (currentDisplay === 'vent') {
+                                    // Couleur selon force du vent
+                                    let ventColor = '#10b981';
+                                    if (periodData.vent >= 60) ventColor = '#ef4444';
+                                    else if (periodData.vent >= 40) ventColor = '#f59e0b';
+                                    else if (periodData.vent >= 25) ventColor = '#fbbf24';
+                                    
+                                    // Flèche
+                                    const angle = (directionAngles[periodData.direction] || 0) * Math.PI / 180;
+                                    ctx.save();
+                                    ctx.translate(iconX, iconY - 10);
+                                    ctx.rotate(angle);
+                                    ctx.fillStyle = ventColor;
+                                    ctx.font = '32px Arial';
+                                    ctx.textAlign = 'center';
+                                    ctx.fillText('➤', 0, 0);
+                                    ctx.restore();
+                                    
+                                    // Vitesse
+                                    ctx.fillStyle = 'white';
+                                    ctx.strokeStyle = '#333';
+                                    ctx.lineWidth = 3;
+                                    ctx.font = 'bold 14px Arial';
+                                    ctx.textAlign = 'center';
+                                    const ventText = periodData.vent + ' km/h';
+                                    ctx.strokeText(ventText, iconX, iconY + 15);
+                                    ctx.fillText(ventText, iconX, iconY + 15);
+                                    
+                                } else if (currentDisplay === 'temperature') {
+                                    // Cercle coloré selon température
+                                    const tempColor = periodData.temperature < 5 ? '#3b82f6' : 
+                                                      periodData.temperature < 15 ? '#10b981' : '#f59e0b';
+                                    
+                                    ctx.fillStyle = tempColor;
+                                    ctx.beginPath();
+                                    ctx.arc(iconX, iconY, iconSize / 2, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    
+                                    ctx.fillStyle = 'white';
+                                    ctx.font = 'bold 18px Arial';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.fillText(periodData.temperature + '°', iconX, iconY);
+                                }
+                            });
+                            
                             resolve();
                         };
                         img.onerror = reject;
@@ -873,14 +974,58 @@
                     });
                 }
 
-                ctx.fillStyle = '#333';
-                ctx.font = 'bold 16px Arial';
+                // Pied de page avec crédit et alertes
+                const footerY = 560;
+                
+                // Ligne de séparation
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(50, footerY);
+                ctx.lineTo(canvas.width - 50, footerY);
+                ctx.stroke();
+                
+                // Vérifier les alertes actives
+                const alertes = [];
+                Object.entries(meteoConfig.villes).forEach(([ville, data]) => {
+                    const maxRisque = getMaxRisque(data[currentPeriod].risques);
+                    if (maxRisque.niveau >= 3) {
+                        alertes.push({ ville, niveau: maxRisque.niveau, phenomene: maxRisque.phenomene });
+                    }
+                });
+                
+                if (alertes.length > 0) {
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('⚠️ VIGILANCES ACTIVES', 50, footerY + 25);
+                    
+                    ctx.font = '14px Arial';
+                    ctx.fillStyle = '#ffffff';
+                    const alertText = alertes.slice(0, 3).map(a => a.ville).join(', ');
+                    ctx.fillText(alertText + (alertes.length > 3 ? ' et ' + (alertes.length - 3) + ' autre(s)' : ''), 50, footerY + 45);
+                }
+                
+                // Crédit en gros et visible
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 20px Arial';
                 ctx.textAlign = 'right';
-                ctx.fillText('© Ciel du Morbihan', canvas.width - 30, canvas.height - 20);
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 8;
+                ctx.fillText('© Ciel et Morbihan', canvas.width - 50, canvas.height - 20);
+                ctx.shadowBlur = 0;
+                
+                // Logo/watermark discret au centre bas
+                ctx.font = '12px Arial';
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.textAlign = 'center';
+                ctx.fillText('ciel-et-morbihan.fr', canvas.width / 2, canvas.height - 10);
 
+                // Télécharger l'image
                 const dataURL = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
-                link.download = 'meteo-bretagne-' + currentPeriod + '-' + new Date().toISOString().split('T')[0] + '.png';
+                const dateStr = new Date().toISOString().split('T')[0];
+                link.download = 'meteo-morbihan-' + currentPeriod + '-' + dateStr + '.png';
                 link.href = dataURL;
                 link.click();
 
@@ -1073,8 +1218,30 @@
                     
                     icon.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; gap: 2px;"><div style="font-size: clamp(1.2rem, 3vw, 2rem); transform: rotate(' + angle + 'deg); color: ' + ventColor + '; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">➤</div><div style="background: white; color: #333; font-weight: bold; font-size: clamp(0.6rem, 1.5vw, 0.75rem); padding: 2px 6px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); white-space: nowrap;">' + periodData.vent + ' km/h</div></div>';
                 } else if (currentDisplay === 'temperature') {
-                    const tempColor = periodData.temperature < 5 ? '#3b82f6' : periodData.temperature < 15 ? '#10b981' : '#f59e0b';
-                    icon.innerHTML = '<div style="background: ' + tempColor + '; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: clamp(0.7rem, 2vw, 1rem); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">' + periodData.temperature + '°C</div>';
+                    // Style thermomètre moderne avec gradient
+                    const temp = periodData.temperature;
+                    let gradientColor;
+                    let textColor = 'white';
+                    
+                    // Dégradé selon la température
+                    if (temp < 0) {
+                        gradientColor = 'linear-gradient(135deg, #1e3a8a, #3b82f6)'; // Bleu foncé à bleu
+                    } else if (temp < 5) {
+                        gradientColor = 'linear-gradient(135deg, #3b82f6, #60a5fa)'; // Bleu
+                    } else if (temp < 10) {
+                        gradientColor = 'linear-gradient(135deg, #0ea5e9, #06b6d4)'; // Cyan
+                    } else if (temp < 15) {
+                        gradientColor = 'linear-gradient(135deg, #10b981, #34d399)'; // Vert
+                    } else if (temp < 20) {
+                        gradientColor = 'linear-gradient(135deg, #fbbf24, #fcd34d)'; // Jaune
+                        textColor = '#333';
+                    } else if (temp < 25) {
+                        gradientColor = 'linear-gradient(135deg, #f59e0b, #fbbf24)'; // Orange
+                    } else {
+                        gradientColor = 'linear-gradient(135deg, #ef4444, #f87171)'; // Rouge
+                    }
+                    
+                    icon.innerHTML = '<div style="background: ' + gradientColor + '; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: ' + textColor + '; font-weight: bold; font-size: clamp(0.7rem, 2vw, 1rem); box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.3);">' + periodData.temperature + '°C</div>';
                 }
 
                 icon.addEventListener('click', () => showCityInfo(ville));
