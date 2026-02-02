@@ -180,8 +180,8 @@
 
         .weather-icon {
             position: absolute;
-            width: clamp(40px, 6vw, 60px);
-            height: clamp(40px, 6vw, 60px);
+            width: clamp(35px, 4vw, 50px);
+            height: clamp(35px, 4vw, 50px);
             cursor: pointer;
             transition: all 0.3s;
             transform: translate(-50%, -50%);
@@ -416,6 +416,7 @@
             <h1>🌤️ Previsions & Risques pour le Morbihan</h1>
             <p class="subtitle">Prévisions interactives</p>
             <p class="last-update" id="last-update">Dernière mise à jour : Chargement...</p>
+            <p class="last-update" id="sun-times" style="margin-top: 5px;"></p>
         </header>
 
         <div id="alert-container"></div>
@@ -477,6 +478,12 @@
             utiliserIconesPersonnalisees: false,
             cheminIcones: "icones/",
             extensionIcones: ".png",
+            
+            // Heures de lever et coucher du soleil (optionnel)
+            soleil: {
+                lever: "08:15",
+                coucher: "17:45"
+            },
             
             villes: {
                 "Lorient": {
@@ -805,9 +812,16 @@
             setupControls();
             loadMap();
             updateLastUpdateTime();
+            updateSunTimes();
             checkAndDisplayAlerts();
             setupExportButton();
             if (!meteoConfig.carteImage) displayWeatherIcons();
+        }
+
+        function updateSunTimes() {
+            if (meteoConfig.soleil && meteoConfig.soleil.lever && meteoConfig.soleil.coucher) {
+                document.getElementById('sun-times').textContent = '🌅 Lever : ' + meteoConfig.soleil.lever + ' • 🌇 Coucher : ' + meteoConfig.soleil.coucher;
+            }
         }
 
         function setupExportButton() {
@@ -1051,10 +1065,16 @@
                     }
                 } else if (currentDisplay === 'vent') {
                     const angle = directionAngles[periodData.direction] || 0;
-                    icon.innerHTML = '<div style="background: linear-gradient(135deg, #4ade80, #10b981); width: 100%; height: 100%; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.7rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"><div style="font-size: 1rem; transform: rotate(' + angle + 'deg);">➤</div><div style="font-size: 0.65rem; margin-top: 2px;">' + periodData.vent + ' km/h</div></div>';
+                    // Couleur selon la force du vent
+                    let ventColor = '#10b981'; // Vert (faible)
+                    if (periodData.vent >= 60) ventColor = '#ef4444'; // Rouge (violent)
+                    else if (periodData.vent >= 40) ventColor = '#f59e0b'; // Orange (fort)
+                    else if (periodData.vent >= 25) ventColor = '#fbbf24'; // Jaune (modéré)
+                    
+                    icon.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; gap: 2px;"><div style="font-size: clamp(1.2rem, 3vw, 2rem); transform: rotate(' + angle + 'deg); color: ' + ventColor + '; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">➤</div><div style="background: white; color: #333; font-weight: bold; font-size: clamp(0.6rem, 1.5vw, 0.75rem); padding: 2px 6px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); white-space: nowrap;">' + periodData.vent + ' km/h</div></div>';
                 } else if (currentDisplay === 'temperature') {
                     const tempColor = periodData.temperature < 5 ? '#3b82f6' : periodData.temperature < 15 ? '#10b981' : '#f59e0b';
-                    icon.innerHTML = '<div style="background: ' + tempColor + '; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">' + periodData.temperature + '°C</div>';
+                    icon.innerHTML = '<div style="background: ' + tempColor + '; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: clamp(0.7rem, 2vw, 1rem); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">' + periodData.temperature + '°C</div>';
                 }
 
                 icon.addEventListener('click', () => showCityInfo(ville));
@@ -1107,4 +1127,4 @@
         init();
     </script>
 </body>
-</html> 
+</html>
