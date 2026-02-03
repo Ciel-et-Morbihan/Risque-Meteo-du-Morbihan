@@ -409,45 +409,16 @@
             background: #a855f7;
         }
     </style>
-        .date-ribbon {
-            position: absolute;
-            top: 10px;
-            left: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 10px 25px 10px 15px;
-            font-weight: 600;
-            font-size: clamp(0.8rem, 1.8vw, 0.95rem);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
-            z-index: 100;
-            border-radius: 0 20px 20px 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: transform 0.3s ease;
-        }
-
-        .date-ribbon:hover {
-            transform: translateX(5px);
-        }
-
-        .date-ribbon::before {
-            content: '📅';
-            font-size: 1.1em;
-        }
-
-        .date-ribbon-date {
-            font-weight: 700;
-            letter-spacing: 0.3px;
-        }
-
-        @media (max-width: 768px) {
-            .date-ribbon {
-                font-size: 0.7rem;
-                padding: 8px 18px 8px 12px;
-                top: 8px;
-            }
-        } 
+        <div class="card">
+    <div class="map-container" id="map-container">
+        <!-- Ruban de date -->
+        <div id="date-ribbon" style="position: absolute; top: 10px; left: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 25px 10px 15px; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5); z-index: 100; border-radius: 0 20px 20px 0; display: flex; align-items: center; gap: 6px; transition: transform 0.3s ease;">
+            <span style="font-size: 1.1em;">📅</span>
+            <span>Prévisions du</span>
+            <span id="prevision-date" style="font-weight: 700; letter-spacing: 0.3px;">Samedi 1 février 2025</span>
+        </div>
+        
+        <div class="placeholder-text">
 </head>
 <body>
     <div class="container">
@@ -481,7 +452,7 @@
         <!-- Ruban de date -->
         <div class="date-ribbon">
             <span>Prévisions du</span>
-            <span class="date-ribbon-date" id="prevision-date">Mercredi 4 février 2025</span>
+            <span class="date-ribbon-date" id="prevision-date">Mercredi 4 février 2026</span>
         </div>
         
         <div class="placeholder-text">
