@@ -752,8 +752,8 @@
         };
 
         const directionAngles = {
-            "N": 90, "NE": 225, "E": 180, "SE": 45,
-            "S": 270, "SO": 135, "O": 0, "NO": 225
+            "N": 90, "NE": 225, "E": 180, "SE": 225,
+            "S": 270, "SO": 315, "O": 0, "NO": 45
         };
 
         const directionLabels = {
@@ -924,9 +924,10 @@
                                 } else if (currentDisplay === 'vent') {
                                     // Couleur selon force du vent
                                     let ventColor = '#10b981';
-                                    if (periodData.vent >= 60) ventColor = '#ef4444';
-                                    else if (periodData.vent >= 40) ventColor = '#f59e0b';
-                                    else if (periodData.vent >= 25) ventColor = '#fbbf24';
+                                    if (periodData.vent >=130) ventColor = '#ef44e1' ;
+                                    else if (periodData.vent >= 100) ventColor = '#ef4444';
+                                    else if (periodData.vent >= 75) ventColor = '#f59e0b';
+                                    else if (periodData.vent >= 45) ventColor = '#fbbf24';
                                     
                                     // Flèche
                                     const angle = (directionAngles[periodData.direction] || 0) * Math.PI / 180;
@@ -1212,9 +1213,10 @@
                     const angle = directionAngles[periodData.direction] || 0;
                     // Couleur selon la force du vent
                     let ventColor = '#10b981'; // Vert (faible)
-                    if (periodData.vent >= 60) ventColor = '#ef4444'; // Rouge (violent)
-                    else if (periodData.vent >= 40) ventColor = '#f59e0b'; // Orange (fort)
-                    else if (periodData.vent >= 25) ventColor = '#fbbf24'; // Jaune (modéré)
+                    if (periodData.vent >=130) ventColor = '#ef44e1';  // Violet (exceptionnel)
+                    else if (periodData.vent >= 100) ventColor = '#ef4444'; // Rouge (violent)
+                    else if (periodData.vent >= 75) ventColor = '#f59e0b'; // Orange (fort)
+                    else if (periodData.vent >= 45) ventColor = '#fbbf24'; // Jaune (modere a sensible)
                     
                     icon.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; gap: 2px;"><div style="font-size: clamp(1.2rem, 3vw, 2rem); transform: rotate(' + angle + 'deg); color: ' + ventColor + '; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">➤</div><div style="background: white; color: #333; font-weight: bold; font-size: clamp(0.6rem, 1.5vw, 0.75rem); padding: 2px 6px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); white-space: nowrap;">' + periodData.vent + ' km/h</div></div>';
                 } else if (currentDisplay === 'temperature') {
@@ -1228,17 +1230,19 @@
                         gradientColor = 'linear-gradient(135deg, #1e3a8a, #3b82f6)'; // Bleu foncé à bleu
                     } else if (temp < 5) {
                         gradientColor = 'linear-gradient(135deg, #3b82f6, #60a5fa)'; // Bleu
-                    } else if (temp < 10) {
+                    } else if (temp < 10 ) {
                         gradientColor = 'linear-gradient(135deg, #0ea5e9, #06b6d4)'; // Cyan
                     } else if (temp < 15) {
                         gradientColor = 'linear-gradient(135deg, #10b981, #34d399)'; // Vert
-                    } else if (temp < 20) {
+                    } else if (temp < 25) {
                         gradientColor = 'linear-gradient(135deg, #fbbf24, #fcd34d)'; // Jaune
                         textColor = '#333';
-                    } else if (temp < 25) {
+                    } else if (temp < 30) {
                         gradientColor = 'linear-gradient(135deg, #f59e0b, #fbbf24)'; // Orange
-                    } else {
+                    } else if (temp < 35)
                         gradientColor = 'linear-gradient(135deg, #ef4444, #f87171)'; // Rouge
+                    } else {
+                        gradientColor = 'linear-gradient(135deg, #ef44e6, #d471f8)'; // Violet
                     }
                     
                     icon.innerHTML = '<div style="background: ' + gradientColor + '; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: ' + textColor + '; font-weight: bold; font-size: clamp(0.7rem, 2vw, 1rem); box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.3);">' + periodData.temperature + '°C</div>';
