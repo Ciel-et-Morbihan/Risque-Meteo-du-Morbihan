@@ -409,16 +409,6 @@
             background: #a855f7;
         }
     </style>
-        <div class="card">
-    <div class="map-container" id="map-container">
-        <!-- Ruban de date -->
-        <div id="date-ribbon" style="position: absolute; top: 10px; left: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 25px 10px 15px; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5); z-index: 100; border-radius: 0 20px 20px 0; display: flex; align-items: center; gap: 6px; transition: transform 0.3s ease;">
-            <span style="font-size: 1.1em;">📅</span>
-            <span>Prévisions du</span>
-            <span id="prevision-date" style="font-weight: 700; letter-spacing: 0.3px;">Samedi 1 février 2025</span>
-        </div>
-        
-        <div class="placeholder-text">
 </head>
 <body>
     <div class="container">
@@ -448,20 +438,13 @@
 
         <div class="main-content">
             <div class="card">
-    <div class="map-container" id="map-container">
-        <!-- Ruban de date -->
-        <div class="date-ribbon">
-            <span>Prévisions du</span>
-            <span class="date-ribbon-date" id="prevision-date">Mercredi 4 février 2026</span>
-        </div>
-        
-        <div class="placeholder-text">
+                <div class="map-container" id="map-container">
+                    <div class="placeholder-text">
                         📍 Ajoutez votre image de carte<br>
                         <small>(Modifiez la configuration dans le code)</small>
                     </div>
                 </div>
             </div>
-            
 
             <div class="card info-panel">
                 <h2>📊 Informations</h2>
@@ -491,11 +474,6 @@
             imageHauteurOriginale: 1890,
             
             dateMiseAJour: new Date().toISOString(),
-
-            // DATE DE PRÉVISIONS (modifiez ici manuellement)
-            datePrevisions: "Mercredi 4 février 2025",
-
-            utiliserIconesPersonnalisees: false,
             
             utiliserIconesPersonnalisees: false,
             cheminIcones: "icones/",
@@ -835,7 +813,6 @@
             loadMap();
             updateLastUpdateTime();
             updateSunTimes();
-            updateDateRibbon();
             checkAndDisplayAlerts();
             setupExportButton();
             if (!meteoConfig.carteImage) displayWeatherIcons();
@@ -844,12 +821,6 @@
         function updateSunTimes() {
             if (meteoConfig.soleil && meteoConfig.soleil.lever && meteoConfig.soleil.coucher) {
                 document.getElementById('sun-times').textContent = '🌅 Lever : ' + meteoConfig.soleil.lever + ' • 🌇 Coucher : ' + meteoConfig.soleil.coucher;
-            }
-        }
-        function updateDateRibbon() {
-        const dateElement = document.getElementById('prevision-date');
-            if (dateElement && meteoConfig.datePrevisions) {
-                dateElement.textContent = meteoConfig.datePrevisions; 
             }
         }
 
@@ -1327,4 +1298,4 @@
         init();
     </script>
 </body>
-</html>
+</html> 
