@@ -439,13 +439,6 @@
         <div class="main-content">
             <div class="card">
                 <div class="map-container" id="map-container">
-                    <!-- Ruban de date -->
-                    <div id="date-ribbon" style="position: absolute; top: 10px; left: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 25px 10px 15px; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5); z-index: 100; border-radius: 0 20px 20px 0; display: flex; align-items: center; gap: 6px; transition: transform 0.3s ease;">
-                        <span style="font-size: 1.1em;">📅</span>
-                        <span>Prévisions du</span>
-                        <span id="prevision-date" style="font-weight: 700; letter-spacing: 0.3px;">Samedi 1 février 2025</span>
-                    </div>
-                    
                     <div class="placeholder-text">
                         📍 Ajoutez votre image de carte<br>
                         <small>(Modifiez la configuration dans le code)</small>
@@ -482,12 +475,12 @@
             
             dateMiseAJour: new Date().toISOString(),
             
-            // DATE DE PRÉVISIONS (modifiez ici manuellement)
-            datePrevisions: "Samedi 1 février 2025",
-            
             utiliserIconesPersonnalisees: false,
             cheminIcones: "icones/",
             extensionIcones: ".png",
+            
+            // DATE DES PRÉVISIONS - MODIFIEZ ICI
+            datePrevision: "Lundi 10 février 2025",
             
             // Heures de lever et coucher du soleil (optionnel)
             soleil: {
@@ -823,7 +816,6 @@
             loadMap();
             updateLastUpdateTime();
             updateSunTimes();
-            updateDateRibbon();
             checkAndDisplayAlerts();
             setupExportButton();
             if (!meteoConfig.carteImage) displayWeatherIcons();
@@ -832,13 +824,6 @@
         function updateSunTimes() {
             if (meteoConfig.soleil && meteoConfig.soleil.lever && meteoConfig.soleil.coucher) {
                 document.getElementById('sun-times').textContent = '🌅 Lever : ' + meteoConfig.soleil.lever + ' • 🌇 Coucher : ' + meteoConfig.soleil.coucher;
-            }
-        }
-
-        function updateDateRibbon() {
-            const dateElement = document.getElementById('prevision-date');
-            if (dateElement && meteoConfig.datePrevisions) {
-                dateElement.textContent = meteoConfig.datePrevisions;
             }
         }
 
@@ -1183,6 +1168,14 @@
 
             if (meteoConfig.carteImage) {
                 container.innerHTML = '<img id="map-image" src="' + meteoConfig.carteImage + '" alt="Carte Bretagne">';
+                
+                // AJOUTER LE RUBAN DE DATE
+                const ribbon = document.createElement('div');
+                ribbon.id = 'date-ribbon';
+                ribbon.style.cssText = 'position: absolute; top: 15px; left: 0; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 30px 12px 20px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 999; border-radius: 0 25px 25px 0;';
+                ribbon.innerHTML = '📅 Prévisions du <span id="date-prevision" style="font-weight: 700;">' + (meteoConfig.datePrevision || 'Lundi 10 février 2025') + '</span>';
+                container.appendChild(ribbon);
+                
                 const img = document.getElementById('map-image');
 
                 if (img.complete) {
@@ -1311,20 +1304,6 @@
 
         window.addEventListener('resize', () => {
             if (currentDisplay) displayWeatherIcons();
-            
-            // Adapter la taille du ruban sur mobile
-            const ribbon = document.getElementById('date-ribbon');
-            if (ribbon) {
-                if (window.innerWidth < 768) {
-                    ribbon.style.fontSize = '0.7rem';
-                    ribbon.style.padding = '8px 18px 8px 12px';
-                    ribbon.style.top = '8px';
-                } else {
-                    ribbon.style.fontSize = '0.9rem';
-                    ribbon.style.padding = '10px 25px 10px 15px';
-                    ribbon.style.top = '10px';
-                }
-            }
         });
 
         init();
