@@ -407,6 +407,16 @@
 
         .risk-badge.violet {
             background: #a855f7;
+        @keyframes pulse {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+    }
+    50% { 
+        transform: scale(1.02); 
+        box-shadow: 0 8px 25px rgba(251, 191, 36, 0.6);
+    }
+}
         }
     </style>
 </head>
@@ -420,14 +430,26 @@
         </header>
 
         <div id="alert-container"></div>
-        <!-- Message humour douceur exceptionnelle -->
-        <div style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; padding: 15px 20px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); text-align: center; font-weight: 600;">
-            <span style="font-size: 1.5rem;">🌡️🔥</span>
-            <span style="font-size: clamp(0.9rem, 2.5vw, 1.1rem);">
-                ALERTE DOUCEUR EXTRÊME • Mardi : températures exceptionnellement agréables remontant par l'est ! 
-                Risque élevé de sourire béat et d'envie de terrasse ☕☀️
-            </span>
+        <div id="alert-container"></div>
+
+<!-- ALERTE HUMOUR : Retour du soleil et douceur -->
+<div style="background: linear-gradient(135deg, #fbbf24, #f59e0b, #ef4444); color: white; padding: 20px 25px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4); border-left: 6px solid #dc2626; animation: pulse 2s ease-in-out infinite;">
+    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <div style="font-size: 3rem; line-height: 1;">☀️🌡️</div>
+        <div style="flex: 1; min-width: 250px;">
+            <div style="font-weight: 700; font-size: clamp(1.1rem, 2.8vw, 1.4rem); margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                ⚠️ ALERTE SPÉCIALE - RETOUR DU SOLEIL & DOUCEUR EXCEPTIONNELLE
+            </div>
+            <div style="font-size: clamp(0.85rem, 2vw, 1rem); opacity: 0.95; line-height: 1.5;">
+                <strong>🌤️ Après-midi :</strong> Le soleil fait son grand retour après près d'un mois d'absence ! Tempête de ciel bleu attendue. 
+                <br>
+                <strong>🔥 Dès mardi :</strong> Extrême douceur par l'est. Risque élevé de bonheur inattendu et de redécouverte des terrasses ! ☕😎
+            </div>
         </div>
+    </div>
+</div>
+
+<div class="controls">
 
 <div class="controls">
 
