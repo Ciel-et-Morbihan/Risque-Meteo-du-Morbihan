@@ -407,16 +407,6 @@
 
         .risk-badge.violet {
             background: #a855f7;
-        @keyframes pulse {
-    0%, 100% { 
-        transform: scale(1); 
-        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
-    }
-    50% { 
-        transform: scale(1.02); 
-        box-shadow: 0 8px 25px rgba(251, 191, 36, 0.6);
-    }
-}
         }
     </style>
 </head>
@@ -1228,18 +1218,18 @@
             document.querySelectorAll('.weather-icon').forEach(icon => icon.remove());
             if (!mapImage) return;
 
-            const rect = mapImage.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
+            const imgWidth = mapImage.offsetWidth;
+            const imgHeight = mapImage.offsetHeight;
+            const offsetX = mapImage.offsetLeft;
+            const offsetY = mapImage.offsetTop;
 
             Object.entries(meteoConfig.villes).forEach(([ville, data]) => {
                 const periodData = data[currentPeriod];
                 const icon = document.createElement('div');
                 icon.className = 'weather-icon';
                 
-                const xPos = (data.xPercent / 100) * rect.width;
-                const yPos = (data.yPercent / 100) * rect.height;
-                const offsetX = rect.left - containerRect.left;
-                const offsetY = rect.top - containerRect.top;
+                const xPos = (data.xPercent / 100) * imgWidth;
+                const yPos = (data.yPercent / 100) * imgHeight;
                 
                 icon.style.left = (offsetX + xPos) + 'px';
                 icon.style.top = (offsetY + yPos) + 'px';
