@@ -833,6 +833,8 @@
         let selectedCity = null;
 
         function init() {
+            console.log('=== INITIALISATION ===');
+            console.log('Version avec debug activé');
             setupControls();
             loadMap();
             updateLastUpdateTime();
@@ -840,6 +842,7 @@
             checkAndDisplayAlerts();
             setupExportButton();
             if (!meteoConfig.carteImage) displayWeatherIcons();
+            console.log('=== FIN INITIALISATION ===');
         }
 
         function updateSunTimes() {
@@ -1185,10 +1188,26 @@
         }
 
         function loadMap() {
+            console.log('loadMap() appelée');
             const container = document.getElementById('map-container');
+            console.log('Container trouvé:', container);
+            console.log('carteImage:', meteoConfig.carteImage);
 
             if (meteoConfig.carteImage) {
-                container.innerHTML = '<img id="map-image" src="' + meteoConfig.carteImage + '" alt="Carte Bretagne">';
+                // Effacer le placeholder
+                container.innerHTML = '';
+                
+                // Créer l'image
+                const img = document.createElement('img');
+                img.id = 'map-image';
+                img.src = meteoConfig.carteImage;
+                img.alt = 'Carte Morbihan';
+                img.style.width = '100%';
+                img.style.height = 'auto';
+                img.style.display = 'block';
+                
+                container.appendChild(img);
+                console.log('Image ajoutée au container');
                 
                 // AJOUTER LE RUBAN DE DATE
                 const ribbon = document.createElement('div');
@@ -1196,40 +1215,63 @@
                 ribbon.style.cssText = 'position: absolute; top: 15px; left: 0; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 30px 12px 20px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 999; border-radius: 0 25px 25px 0;';
                 ribbon.innerHTML = '📅 Prévisions du <span id="date-prevision" style="font-weight: 700;">' + (meteoConfig.datePrevision || 'Lundi 10 février 2025') + '</span>';
                 container.appendChild(ribbon);
-                
-                const img = document.getElementById('map-image');
+                console.log('Ruban ajouté');
 
-                if (img.complete) {
-                    setTimeout(() => displayWeatherIcons(), 100);
-                } else {
-                    img.addEventListener('load', () => setTimeout(() => displayWeatherIcons(), 100));
-                    img.addEventListener('error', () => {
-                        console.error('Erreur chargement image');
+                img.addEventListener('load', () => {
+                    console.log('Image chargée avec succès');
+                    setTimeout(() => {
+                        console.log('Appel displayWeatherIcons()');
                         displayWeatherIcons();
-                    });
+                    }, 100);
+                });
+                
+                img.addEventListener('error', () => {
+                    console.error('ERREUR: Image non trouvée -', meteoConfig.carteImage);
+                    container.innerHTML = '<div style="padding: 50px; text-align: center; color: #ef4444; font-weight: bold;">⚠️ Image de carte non trouvée<br><small style="color: #666; font-weight: normal;">Vérifiez que "' + meteoConfig.carteImage + '" existe dans le même dossier</small></div>';
+                });
+                
+                // Si l'image est déjà en cache
+                if (img.complete) {
+                    console.log('Image déjà en cache');
+                    setTimeout(() => displayWeatherIcons(), 100);
                 }
+            } else {
+                console.log('Pas de carteImage configurée, affichage des icônes sans carte');
+                displayWeatherIcons();
             }
         }
 
         function displayWeatherIcons() {
+            console.log('displayWeatherIcons() appelée');
             const container = document.getElementById('map-container');
             const mapImage = document.getElementById('map-image');
+            
+            console.log('Container:', container);
+            console.log('MapImage:', mapImage);
 
+            // Supprimer les anciennes icônes
             document.querySelectorAll('.weather-icon').forEach(icon => icon.remove());
-            if (!mapImage) return;
+            
+            if (!mapImage) {
+                console.error('ERREUR: map-image introuvable !');
+                return;
+            }
 
-            const imgWidth = mapImage.offsetWidth;
-            const imgHeight = mapImage.offsetHeight;
-            const offsetX = mapImage.offsetLeft;
-            const offsetY = mapImage.offsetTop;
+            const rect = mapImage.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            console.log('Image dimensions:', rect.width, 'x', rect.height);
+            console.log('Nombre de villes:', Object.keys(meteoConfig.villes).length);
 
             Object.entries(meteoConfig.villes).forEach(([ville, data]) => {
                 const periodData = data[currentPeriod];
                 const icon = document.createElement('div');
                 icon.className = 'weather-icon';
                 
-                const xPos = (data.xPercent / 100) * imgWidth;
-                const yPos = (data.yPercent / 100) * imgHeight;
+                const xPos = (data.xPercent / 100) * rect.width;
+                const yPos = (data.yPercent / 100) * rect.height;
+                const offsetX = rect.left - containerRect.left;
+                const offsetY = rect.top - containerRect.top;
                 
                 icon.style.left = (offsetX + xPos) + 'px';
                 icon.style.top = (offsetY + yPos) + 'px';
@@ -1283,6 +1325,9 @@
                 icon.addEventListener('click', () => showCityInfo(ville));
                 container.appendChild(icon);
             });
+            
+            const iconCount = container.querySelectorAll('.weather-icon').length;
+            console.log('Icônes météo ajoutées:', iconCount);
         }
 
         function showCityInfo(ville) {
